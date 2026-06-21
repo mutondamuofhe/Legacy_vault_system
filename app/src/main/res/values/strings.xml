@@ -1,0 +1,70 @@
+<resources>
+    <string name="app_name">Legacy Vault System</string>
+    <string name="welcome_title">Protect Your Digital Legacy</string>
+    <string name="welcome_subtitle">The secure way to manage your important information and documents for your loved ones.</string>
+    <string name="btn_login">Login</string>
+    <string name="btn_register">Register</string>
+    <string name="btn_learn_more">Learn More</string>
+    <string name="logo_description">Legacy Vault System Logo</string>
+
+    <string name="login_title">Login</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+
+    <string name="register_title">Register</string>
+    <string name="hint_full_name">Full Name</string>
+    <string name="hint_id_number">ID Number</string>
+    <string name="hint_phone">Phone Number</string>
+    <string name="hint_security_question">Security Question</string>
+
+    <string name="menu_dashboard">Dashboard</string>
+    <string name="menu_assets">Digital Assets</string>
+    <string name="menu_vault">Document Vault</string>
+    <string name="menu_executors">Executors</string>
+    <string name="menu_instructions">Instructions</string>
+    <string name="menu_sign_out">Sign Out</string>
+
+    <string-array name="asset_categories">
+        <item>Banking &amp; Finance</item>
+        <item>Social Media</item>
+        <item>Email</item>
+        <item>Entertainment</item>
+        <item>Other</item>
+    </string-array>
+
+    <string-array name="asset_actions">
+        <item>Transfer to Executor</item>
+        <item>Delete Account</item>
+        <item>Memorialize</item>
+    </string-array>
+
+    <string-array name="document_categories">
+        <item>Identity</item>
+        <item>Legal</item>
+        <item>Financial</item>
+        <item>Medical</item>
+        <item>Other</item>
+    </string-array>
+
+    <string-array name="instruction_categories">
+        <item>General</item>
+        <item>Social Media</item>
+        <item>Financial</item>
+        <item>Personal Messages</item>
+        <item>Other</item>
+    </string-array>
+
+    <string-array name="priorities">
+        <item>High</item>
+        <item>Medium</item>
+        <item>Low</item>
+    </string-array>
+
+    <string-array name="access_levels">
+        <item>Full Access</item>
+        <item>Documents Only</item>
+        <item>Assets Only</item>
+        <item>Limited</item>
+    </string-array>
+</resources>
