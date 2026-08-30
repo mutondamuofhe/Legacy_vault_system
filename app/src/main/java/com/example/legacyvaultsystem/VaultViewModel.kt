@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -30,15 +31,21 @@ class VaultViewModel : ViewModel() {
     private val _activities = MutableLiveData<List<Activity>>(emptyList())
     val activities: LiveData<List<Activity>> = _activities
 
+    private var listeners = mutableListOf<ListenerRegistration>()
+
     init {
         loadData()
     }
 
     private fun loadData() {
-        val userId = auth.currentUser?.uid ?: "test_user"
+        // Clear old listeners if any
+        listeners.forEach { it.remove() }
+        listeners.clear()
+
+        val userId = auth.currentUser?.uid ?: return
         
         // Listen to Assets
-        db.collection("users").document(userId).collection("assets")
+        listeners.add(db.collection("users").document(userId).collection("assets")
             .addSnapshotListener { snapshot, _ ->
                 val list = snapshot?.documents?.mapNotNull { doc ->
                     DigitalAsset(
@@ -49,10 +56,10 @@ class VaultViewModel : ViewModel() {
                     )
                 } ?: emptyList()
                 _assets.value = list
-            }
+            })
 
         // Listen to Documents
-        db.collection("users").document(userId).collection("documents")
+        listeners.add(db.collection("users").document(userId).collection("documents")
             .addSnapshotListener { snapshot, _ ->
                 val list = snapshot?.documents?.mapNotNull { doc ->
                     Document(
@@ -62,10 +69,10 @@ class VaultViewModel : ViewModel() {
                     )
                 } ?: emptyList()
                 _documents.value = list
-            }
+            })
 
         // Listen to Executors
-        db.collection("users").document(userId).collection("executors")
+        listeners.add(db.collection("users").document(userId).collection("executors")
             .addSnapshotListener { snapshot, _ ->
                 val list = snapshot?.documents?.mapNotNull { doc ->
                     Executor(
@@ -78,10 +85,10 @@ class VaultViewModel : ViewModel() {
                     )
                 } ?: emptyList()
                 _executors.value = list
-            }
+            })
             
         // Listen to Instructions
-        db.collection("users").document(userId).collection("instructions")
+        listeners.add(db.collection("users").document(userId).collection("instructions")
             .addSnapshotListener { snapshot, _ ->
                 val list = snapshot?.documents?.mapNotNull { doc ->
                     Instruction(
@@ -92,10 +99,10 @@ class VaultViewModel : ViewModel() {
                     )
                 } ?: emptyList()
                 _instructions.value = list
-            }
+            })
 
         // Listen to Activities
-        db.collection("users").document(userId).collection("activities")
+        listeners.add(db.collection("users").document(userId).collection("activities")
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, _ ->
                 val list = snapshot?.documents?.mapNotNull { doc ->
@@ -107,7 +114,7 @@ class VaultViewModel : ViewModel() {
                     )
                 } ?: emptyList()
                 _activities.value = list
-            }
+            })
     }
 
     private fun getCurrentDate(): String {
@@ -116,7 +123,7 @@ class VaultViewModel : ViewModel() {
     }
 
     fun addAsset(name: String, platform: String, category: String, username: String = "", passwordHint: String = "", url: String = "", action: String = "No Action") {
-        val userId = auth.currentUser?.uid ?: "test_user"
+        val userId = auth.currentUser?.uid ?: return
         val data = hashMapOf(
             "name" to name,
             "platform" to platform,
@@ -132,7 +139,7 @@ class VaultViewModel : ViewModel() {
     }
 
     fun addDocument(title: String, category: String, fileName: String, description: String = "", notes: String = "") {
-        val userId = auth.currentUser?.uid ?: "test_user"
+        val userId = auth.currentUser?.uid ?: return
         val data = hashMapOf(
             "title" to title,
             "category" to category,
@@ -146,7 +153,7 @@ class VaultViewModel : ViewModel() {
     }
 
     fun addExecutor(name: String, relation: String, email: String, phone: String, accessLevel: String = "Full Access", isPrimary: Boolean = false) {
-        val userId = auth.currentUser?.uid ?: "test_user"
+        val userId = auth.currentUser?.uid ?: return
         val data = hashMapOf(
             "name" to name,
             "relation" to relation,
@@ -161,7 +168,7 @@ class VaultViewModel : ViewModel() {
     }
 
     fun addInstruction(title: String, content: String, type: String = "General", priority: String = "Medium") {
-        val userId = auth.currentUser?.uid ?: "test_user"
+        val userId = auth.currentUser?.uid ?: return
         val data = hashMapOf(
             "title" to title,
             "content" to content,
@@ -174,7 +181,7 @@ class VaultViewModel : ViewModel() {
     }
 
     private fun addActivity(title: String, subtitle: String, type: String) {
-        val userId = auth.currentUser?.uid ?: "test_user"
+        val userId = auth.currentUser?.uid ?: return
         val dateStr = getCurrentDate()
         val data = hashMapOf(
             "title" to title,
@@ -184,5 +191,10 @@ class VaultViewModel : ViewModel() {
             "timestamp" to Timestamp.now()
         )
         db.collection("users").document(userId).collection("activities").add(data)
+    }
+
+    override fun onCleared() {
+        listeners.forEach { it.remove() }
+        super.onCleared()
     }
 }

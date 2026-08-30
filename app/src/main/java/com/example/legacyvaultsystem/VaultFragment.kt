@@ -1,14 +1,18 @@
 package com.example.legacyvaultsystem
 
+import android.app.Activity
 import android.app.Dialog
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.example.legacyvaultsystem.databinding.DialogUploadDocumentBinding
@@ -20,6 +24,21 @@ class VaultFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: VaultViewModel by activityViewModels()
+    private var selectedFileName: String? = null
+
+    private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.data?.let { uri ->
+                val fileName = context?.contentResolver?.query(uri, null, null, null, null)?.use { cursor ->
+                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    cursor.moveToFirst()
+                    cursor.getString(nameIndex)
+                } ?: "file_uploaded"
+                selectedFileName = fileName
+                Toast.makeText(context, "Selected: $fileName", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -75,7 +94,9 @@ class VaultFragment : Fragment() {
         dialogBinding.btnCancel.setOnClickListener { dialog.dismiss() }
         
         dialogBinding.layoutUpload.setOnClickListener {
-            Toast.makeText(context, "Opening file picker...", Toast.LENGTH_SHORT).show()
+            val intent = Intent(Intent.ACTION_GET_CONTENT)
+            intent.type = "*/*"
+            filePickerLauncher.launch(intent)
         }
 
         dialogBinding.btnUploadConfirm.setOnClickListener {
@@ -83,8 +104,9 @@ class VaultFragment : Fragment() {
             val category = dialogBinding.spinnerDocCategory.selectedItem?.toString() ?: ""
             
             if (title.isNotEmpty()) {
-                viewModel.addDocument(title, category, "uploaded_file.pdf")
+                viewModel.addDocument(title, category, selectedFileName ?: "unknown_file")
                 dialog.dismiss()
+                selectedFileName = null
             } else {
                 dialogBinding.etDocTitle.error = "Title is required"
             }

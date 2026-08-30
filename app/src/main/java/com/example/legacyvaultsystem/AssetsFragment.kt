@@ -13,12 +13,14 @@ import androidx.fragment.app.activityViewModels
 import com.example.legacyvaultsystem.databinding.DialogAddAssetBinding
 import com.example.legacyvaultsystem.databinding.FragmentAssetsBinding
 import com.example.legacyvaultsystem.databinding.ItemAssetBinding
+import com.google.android.material.tabs.TabLayout
 
 class AssetsFragment : Fragment() {
     private var _binding: FragmentAssetsBinding? = null
     private val binding get() = _binding!!
 
     private val viewModel: VaultViewModel by activityViewModels()
+    private var currentFilter: String = "All"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,25 +34,44 @@ class AssetsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel.assets.observe(viewLifecycleOwner) { assets ->
-            if (assets.isNotEmpty()) {
-                binding.layoutEmptyState.visibility = View.GONE
-                binding.layoutAssetsList.visibility = View.VISIBLE
-                binding.layoutAssetsList.removeAllViews()
-                assets.forEach { asset ->
-                    val itemBinding = ItemAssetBinding.inflate(layoutInflater, binding.layoutAssetsList, false)
-                    itemBinding.tvAssetName.text = asset.name
-                    itemBinding.tvAssetPlatform.text = asset.platform
-                    itemBinding.tvAssetAction.text = asset.actionAfterDeath
-                    binding.layoutAssetsList.addView(itemBinding.root)
-                }
-            } else {
-                binding.layoutEmptyState.visibility = View.VISIBLE
-                binding.layoutAssetsList.visibility = View.GONE
-            }
+            updateAssetsList(assets)
         }
+
+        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                currentFilter = tab?.text.toString()
+                viewModel.assets.value?.let { updateAssetsList(it) }
+            }
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+            override fun onTabReselected(tab: TabLayout.Tab?) {}
+        })
 
         binding.btnAddAsset.setOnClickListener {
             showAddAssetDialog()
+        }
+    }
+
+    private fun updateAssetsList(assets: List<DigitalAsset>) {
+        val filteredAssets = if (currentFilter == "All") {
+            assets
+        } else {
+            assets.filter { it.category.contains(currentFilter, ignoreCase = true) }
+        }
+
+        if (filteredAssets.isNotEmpty()) {
+            binding.layoutEmptyState.visibility = View.GONE
+            binding.layoutAssetsList.visibility = View.VISIBLE
+            binding.layoutAssetsList.removeAllViews()
+            filteredAssets.forEach { asset ->
+                val itemBinding = ItemAssetBinding.inflate(layoutInflater, binding.layoutAssetsList, false)
+                itemBinding.tvAssetName.text = asset.name
+                itemBinding.tvAssetPlatform.text = asset.platform
+                itemBinding.tvAssetAction.text = asset.actionAfterDeath
+                binding.layoutAssetsList.addView(itemBinding.root)
+            }
+        } else {
+            binding.layoutEmptyState.visibility = View.VISIBLE
+            binding.layoutAssetsList.visibility = View.GONE
         }
     }
 
