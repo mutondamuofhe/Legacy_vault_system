@@ -15,11 +15,21 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.btnLoginSubmit.setOnClickListener {
-            // For now, just navigate to Dashboard
-            Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
-            val intent = Intent(this, DashboardActivity::class.java)
-            startActivity(intent)
-            finish() // Close login activity
+            val email = binding.etEmail.text.toString().trim()
+            
+            if (email == "admin@legacy.com") {
+                // Navigate to Admin Dashboard
+                Toast.makeText(this, "Admin Login Successful", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, AdminActivity::class.java)
+                startActivity(intent)
+                finish()
+            } else {
+                // For now, just navigate to User Dashboard
+                Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, DashboardActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
         }
     }
 }

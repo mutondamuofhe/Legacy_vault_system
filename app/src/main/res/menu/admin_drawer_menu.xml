@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/admin_nav_dashboard"
+            android:icon="@drawable/ic_dashboard_outline"
+            android:title="Admin Dashboard" />
+        <item
+            android:id="@+id/admin_nav_users"
+            android:icon="@drawable/ic_people_outline"
+            android:title="User Management" />
+        <item
+            android:id="@+id/admin_nav_vaults"
+            android:icon="@android:drawable/ic_lock_idle_lock"
+            android:title="Vault Monitoring" />
+        <item
+            android:id="@+id/admin_nav_requests"
+            android:icon="@drawable/ic_shield_outline"
+            android:title="Access Requests" />
+        <item
+            android:id="@+id/admin_nav_notifications"
+            android:icon="@android:drawable/ic_popup_reminder"
+            android:title="Notifications" />
+        <item
+            android:id="@+id/admin_nav_reports"
+            android:icon="@drawable/ic_list_outline"
+            android:title="Reports" />
+    </group>
+
+    <item android:title="System">
+        <menu>
+            <item
+                android:id="@+id/admin_nav_exit"
+                android:icon="@drawable/ic_logout_outline"
+                android:title="Exit Admin Mode" />
+        </menu>
+    </item>
+</menu>
