@@ -34,12 +34,14 @@ class RegisterActivity : AppCompatActivity() {
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
-                        Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show()
-                        val intent = Intent(this, DashboardActivity::class.java)
+                        Toast.makeText(this, "Registration successful! Please login.", Toast.LENGTH_SHORT).show()
+                        // Instead of going to Dashboard, go back to Login
+                        val intent = Intent(this, LoginActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         startActivity(intent)
-                        finishAffinity()
+                        finish()
                     } else {
-                        Toast.makeText(this, "Registration failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, "Registration failed: ${task.exception?.localizedMessage}", Toast.LENGTH_LONG).show()
                     }
                 }
         }
