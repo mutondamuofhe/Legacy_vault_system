@@ -45,7 +45,8 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx:23.2.1")
     implementation("com.google.firebase:firebase-firestore-ktx:25.1.4")
     implementation("com.google.firebase:firebase-common-ktx:21.0.0")
-    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-analytics:22.1.0")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
 
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.fragment.ktx)

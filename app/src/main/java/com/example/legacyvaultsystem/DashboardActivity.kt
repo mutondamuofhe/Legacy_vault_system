@@ -41,6 +41,7 @@ class DashboardActivity : AppCompatActivity() {
                 R.id.nav_vault -> replaceFragment(VaultFragment())
                 R.id.nav_executors -> replaceFragment(ExecutorsFragment())
                 R.id.nav_instructions -> replaceFragment(InstructionsFragment())
+                R.id.nav_settings -> replaceFragment(SettingsFragment())
                 R.id.nav_sign_out -> {
                     signOut()
                 }
