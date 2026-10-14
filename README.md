@@ -1,65 +1,81 @@
-Legacy Vault System
-Legacy Vault System is a secure, personal digital estate planning application designed to help users manage their digital legacy. It allows users to safely store information about their online accounts, upload critical documents, assign trusted executors, and leave clear instructions for their loved ones.
-Key Features
-User Features
+# Legacy Vault System - Digital Legacy & Estate Management
 
-Home Dashboard: A high-level overview of your vault, including real-time stat cards and a Vault Health progress tracker.
-Digital Assets: Securely record banking, social media, and email accounts. Includes "Action After Death" directives (Close, Transfer, Memorialize).
-Document Vault: Securely upload and manage important files like Wills, IDs, and property deeds with an integrated file picker.
-Digital Executors: Assign trusted contacts to manage your estate. Supports primary executor designation (⭐) and tiered access levels.
-Legacy Instructions: Write detailed, prioritized directives for your executors to ensure your wishes are followed.
+**Legacy Vault System** is a secure, personal digital estate planning Android application designed to help users organize and manage their digital legacy. It enables users to safely record online account details, store critical documents, designate trusted executors, write prioritized instructions for loved ones, and convert financial digital assets with live REST API market rates.
 
-Timeline Activity: A real-time log of all changes made to your vault.
+---
 
- Admin Console
+## 🚀 Key Features
 
-Secure Access: Only accessible via specialized administrative credentials.
-System Overview: Global statistics for total users, total documents, and pending access requests.
-User Management: Monitor, edit, or deactivate user accounts.
-Audit Trail: High-level monitoring of system-wide activity and vault health.
-Broadcast Notifications: Send system-wide alerts to all registered users.
+### 🔐 Authentication & Single Sign-On (SSO)
+* **Firebase Authentication**: Email and password sign-in with server-side password encryption.
+* **Single Sign-On (SSO)**: One-click "Sign in with Google" integration via Google Sign-In and Firebase Auth Google Provider.
 
-Tech Stack
+### 📊 Home Dashboard & Live REST API Integration
+* **Real-Time Overview**: High-level stat cards tracking Digital Assets, Documents, Executors, and Instructions.
+* **Live REST API Integration**: Real-time financial exchange rate updates fetched from `Open Exchange Rates REST API` (`open.er-api.com`) to evaluate multi-currency financial/crypto estate assets (USD, ZAR, EUR, GBP).
+* **Vault Health Progress Tracker**: Interactive checklist measuring estate completion status.
+* **Activity Timeline**: Real-time audit log of all account changes.
 
-Platform: Android (Kotlin)
+### 🛡️ Core Vault Modules
+1. **Digital Assets**: Record banking, crypto, social media, and email accounts with password hints and post-mortem actions (*Transfer*, *Delete*, *Memorialize*).
+2. **Document Vault**: Store personal, legal, financial, and medical documents with category metadata and notes.
+3. **Digital Executors**: Designate primary/secondary estate contacts with defined permission access levels (*Full Access*, *Legal & Financial*, *Documents Only*, *Limited*).
+4. **Legacy Instructions**: Prioritized directives (*High*, *Medium*, *Low*) guiding executors through digital estate handling.
 
-UI/UX: Material Design 3, XML Layouts, Custom Vector Graphics
-Database: Firebase Cloud Firestore (Real-time syncing)
-Authentication: Firebase Auth (Email/Password with role-based routing)
-Architecture: MVVM (Model-View-ViewModel) with shared ViewModels for cross-fragment data sync.
+### ⚙️ App Settings & Sample Data Seeder
+* **Profile Management**: Update user display names and profile records.
+* **Account Security**: Password reset link generator dispatched via Firebase Auth.
+* **App Preferences**: Persistent settings toggles for Email Notifications and Biometrics/PIN App Lock.
+* **Database Seeder**: One-click sample data generator populating **10+ realistic records per table/collection** for demonstration and testing.
 
-Visual Identity
-Primary Color
-Accent Color
-Admin Theme
-Typography
-Deep Navy #0A1931
-Gold #D4AF37
-Slate #2C3E50
-Elegant Serif Headers
+### ❓ User Support & Documentation
+* **In-App User Guide**: Step-by-step user guide explaining all app surfaces.
+* **Frequently Asked Questions (FAQ)**: Security, privacy, and executor access answers.
+* **Contact Support**: Direct email support launcher (`support@legacyvaultsystem.com`).
 
-Setup & Installation
-1.
-Clone the Repository:
-Shell Script
-git clone https://github.com/yourusername/LegacyVaultSystem.git
-2.
-Add Firebase:
-Create a project in the Firebase Console.
-Enable Email/Password Authentication.
-Initialize a Firestore Database in Test Mode.
-Download your google-services.json and place it in the app/ directory.
-3.Build & Run:
-Open the project in Android Studio.
-Sync Gradle and run the app on an emulator or physical device.
-Security & Privacy
-Data Isolation: Every user’s data is stored in a private Firebase silo. Users can only access data associated with their unique UID.
-Role-Based Login: The app automatically distinguishes between regular users and system admins during the login process.
+---
 
-Roadmap
-[ ] Implement real biometric (Fingerprint/FaceID) lock.
-[ ] Develop the Web Application version (React/Tailwind).
-[ ] Integrate end-to-end encryption for uploaded documents.
+## 🛠️ Tech Stack & Architecture
 
-License
-This project is licensed under the MIT License - see the LICENSE file for details.
+* **Language**: Kotlin
+* **UI Framework**: Material Design 3, View Binding, ConstraintLayout, Custom Vector Graphics
+* **Architecture**: MVVM (Model-View-ViewModel) with `LiveData` and `activityViewModels`
+* **Database / Backend**: Firebase Cloud Firestore & Firebase Auth
+* **REST API**: `HttpURLConnection`, `JSONObject`, and background thread execution for Open Exchange Rates API
+* **CI/CD**: GitHub Actions workflow for automated testing and APK artifact generation
+
+---
+
+## 🧪 Automated Testing & CI/CD Pipeline
+
+### Local Unit Tests
+Run local unit tests via Gradle:
+```bash
+./gradlew testDebugUnitTest
+```
+Unit test suite covers:
+* `AuthValidationTest`: Email and password strength criteria.
+* `DataModelTest`: Object initialization and data mapping integrity.
+* `CurrencyApiServiceTest`: Async REST API parsing and fallback handling.
+
+### GitHub Actions Workflow
+Continuous Integration is configured in `.github/workflows/android.yml`:
+1. Automated environment setup with JDK 17.
+2. Automated execution of unit test suite (`./gradlew testDebugUnitTest`).
+3. Automated debug build generation (`./gradlew assembleDebug`).
+4. Automatic upload of compiled APK artifact on pushes to `main`/`master`.
+
+---
+
+## 📦 Database Structure (DBMS - Cloud Firestore)
+
+* `users/{userId}/assets`: Name, Platform, Category, Username, PasswordHint, URL, ActionAfterDeath, Timestamp
+* `users/{userId}/documents`: Title, Category, FileName, Description, Notes, Timestamp
+* `users/{userId}/executors`: Name, Relation, Email, Phone, AccessLevel, IsPrimary, Timestamp
+* `users/{userId}/instructions`: Title, Content, Type, Priority, Timestamp
+* `users/{userId}/activities`: Title, Subtitle, Date, IconType, Timestamp
+
+---
+
+## 📄 License
+This project is developed for educational purposes under the IIE Module Guidelines.
