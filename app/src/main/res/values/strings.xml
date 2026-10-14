@@ -55,6 +55,9 @@
     <string name="preferences_section_title">Preferences</string>
     <string name="switch_email_notifications">Enable Email Notifications</string>
     <string name="switch_biometric_lock">Enable App Lock (Biometrics/PIN)</string>
+    <string name="seed_section_title">Sample Data Generator</string>
+    <string name="seed_description">Populate database with 10 sample records per table for testing/demo</string>
+    <string name="btn_populate_database">Populate Sample Database (10 Records / Table)</string>
 
     <string-array name="asset_categories">
         <item>Banking &amp; Finance</item>
