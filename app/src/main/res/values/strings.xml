@@ -24,10 +24,25 @@
     <string name="menu_executors">Executors</string>
     <string name="menu_instructions">Instructions</string>
     <string name="menu_settings">Settings</string>
+    <string name="menu_help">Help &amp; Support</string>
     <string name="menu_sign_out">Sign Out</string>
     <string name="btn_google_sign_in">Sign in with Google</string>
     <string name="or_divider">OR</string>
     <string name="default_web_client_id">1045674100545-dummywebclientid.apps.googleusercontent.com</string>
+
+    <string name="help_title">Help &amp; User Support</string>
+    <string name="help_subtitle">Learn how to manage your digital legacy and get assistance</string>
+    <string name="user_guide_section">User Guide &amp; Documentation</string>
+    <string name="user_guide_content">Welcome to Legacy Vault System! This application allows you to securely store and organize your digital legacy for your designated executors.\n\n1. Digital Assets: Record your digital accounts, credentials, and specify post-mortem actions.\n2. Document Vault: Upload and organize essential identity, legal, and financial documents.\n3. Executors: Assign trusted contacts and assign them tailored access levels.\n4. Instructions: Write specific directives for your executors regarding handling your digital footprint.</string>
+    <string name="faq_section">Frequently Asked Questions (FAQ)</string>
+    <string name="faq1_q">Q: Is my data securely stored?</string>
+    <string name="faq1_a">A: Yes, all data is authenticated and stored securely in Cloud Firestore with encrypted credentials.</string>
+    <string name="faq2_q">Q: How do my executors access my vault?</string>
+    <string name="faq2_a">A: Assigned executors receive permission based on their access level after submitting an access request to the administrator.</string>
+    <string name="faq3_q">Q: Can I change or revoke an executor?</string>
+    <string name="faq3_a">A: Yes, you can add, edit, or remove executors anytime from the Executors tab.</string>
+    <string name="support_section">Need Support?</string>
+    <string name="contact_support_btn">Contact Support Team</string>
 
     <string name="settings_title">App Settings</string>
     <string name="settings_subtitle">Manage your account preferences and security options</string>
