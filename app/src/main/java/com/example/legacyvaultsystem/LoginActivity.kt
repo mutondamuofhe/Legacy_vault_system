@@ -10,12 +10,16 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private val auth = FirebaseAuth.getInstance()
+    private val db = FirebaseFirestore.getInstance()
     private lateinit var googleSignInClient: GoogleSignInClient
 
     private val googleSignInLauncher = registerForActivityResult(
@@ -30,7 +34,7 @@ class LoginActivity : AppCompatActivity() {
                     .addOnCompleteListener(this) { authTask ->
                         if (authTask.isSuccessful) {
                             Toast.makeText(this, "Google Sign-In Successful", Toast.LENGTH_SHORT).show()
-                            navigateToDashboard()
+                            syncUserProfileAndNavigate(account.email ?: "", account.displayName ?: "")
                         } else {
                             Toast.makeText(this, "Authentication Failed: ${authTask.exception?.message}", Toast.LENGTH_LONG).show()
                         }
@@ -74,7 +78,7 @@ class LoginActivity : AppCompatActivity() {
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
                         Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
-                        navigateToDashboard()
+                        syncUserProfileAndNavigate(email)
                     } else {
                         val exception = task.exception
                         if (exception is com.google.firebase.auth.FirebaseAuthInvalidUserException) {
@@ -94,6 +98,22 @@ class LoginActivity : AppCompatActivity() {
                 googleSignInLauncher.launch(signInIntent)
             }
         }
+    }
+
+    private fun syncUserProfileAndNavigate(email: String, displayName: String = "") {
+        val userId = auth.currentUser?.uid
+        if (userId != null) {
+            val userMap = hashMapOf(
+                "uid" to userId,
+                "email" to email,
+                "fullName" to (if (displayName.isNotEmpty()) displayName else email.substringBefore("@")),
+                "status" to "Active",
+                "role" to "user",
+                "lastLogin" to Timestamp.now()
+            )
+            db.collection("users").document(userId).set(userMap, SetOptions.merge())
+        }
+        navigateToDashboard()
     }
 
     private fun navigateToDashboard() {

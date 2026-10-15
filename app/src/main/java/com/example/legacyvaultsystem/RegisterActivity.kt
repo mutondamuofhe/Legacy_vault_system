@@ -10,12 +10,16 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
     private val auth = FirebaseAuth.getInstance()
+    private val db = FirebaseFirestore.getInstance()
     private lateinit var googleSignInClient: GoogleSignInClient
 
     private val googleSignInLauncher = registerForActivityResult(
@@ -29,6 +33,19 @@ class RegisterActivity : AppCompatActivity() {
                 auth.signInWithCredential(credential)
                     .addOnCompleteListener(this) { authTask ->
                         if (authTask.isSuccessful) {
+                            val userId = auth.currentUser?.uid
+                            if (userId != null) {
+                                val userMap = hashMapOf(
+                                    "uid" to userId,
+                                    "fullName" to (account.displayName ?: account.email?.substringBefore("@") ?: "Google User"),
+                                    "email" to (account.email ?: ""),
+                                    "status" to "Active",
+                                    "role" to "user",
+                                    "createdAt" to Timestamp.now()
+                                )
+                                db.collection("users").document(userId).set(userMap, SetOptions.merge())
+                            }
+
                             Toast.makeText(this, "Google Sign-In Successful", Toast.LENGTH_SHORT).show()
                             val intent = Intent(this, DashboardActivity::class.java)
                             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -74,6 +91,21 @@ class RegisterActivity : AppCompatActivity() {
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
+                        val userId = auth.currentUser?.uid
+                        if (userId != null) {
+                            val userMap = hashMapOf(
+                                "uid" to userId,
+                                "fullName" to fullName,
+                                "email" to email,
+                                "phone" to binding.etPhone.text.toString().trim(),
+                                "idNumber" to binding.etIdNumber.text.toString().trim(),
+                                "status" to "Active",
+                                "role" to "user",
+                                "createdAt" to Timestamp.now()
+                            )
+                            db.collection("users").document(userId).set(userMap, SetOptions.merge())
+                        }
+
                         Toast.makeText(this, "Registration successful! Please login.", Toast.LENGTH_SHORT).show()
                         val intent = Intent(this, LoginActivity::class.java)
                         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
