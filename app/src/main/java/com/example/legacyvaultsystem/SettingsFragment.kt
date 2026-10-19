@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import com.example.legacyvaultsystem.databinding.FragmentSettingsBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -19,7 +18,6 @@ class SettingsFragment : Fragment() {
 
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
-    private val viewModel: VaultViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -96,19 +94,6 @@ class SettingsFragment : Fragment() {
             prefs.edit().putBoolean("biometrics_enabled", isChecked).apply()
             val status = if (isChecked) "enabled" else "disabled"
             Toast.makeText(requireContext(), "App lock $status", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.btnPopulateData.setOnClickListener {
-            binding.btnPopulateData.isEnabled = false
-            Toast.makeText(requireContext(), "Populating database with sample records...", Toast.LENGTH_SHORT).show()
-            viewModel.populateSampleDatabase { success ->
-                binding.btnPopulateData.isEnabled = true
-                if (success) {
-                    Toast.makeText(requireContext(), "Successfully added 10 records per table to Firestore!", Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(requireContext(), "Failed to populate sample data.", Toast.LENGTH_SHORT).show()
-                }
-            }
         }
     }
 

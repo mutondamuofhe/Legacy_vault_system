@@ -2,6 +2,7 @@ package com.example.legacyvaultsystem
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
@@ -11,6 +12,7 @@ import com.google.firebase.auth.FirebaseAuth
 class DashboardActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDashboardBinding
     private val auth = FirebaseAuth.getInstance()
+    private val viewModel: VaultViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,6 +25,8 @@ class DashboardActivity : AppCompatActivity() {
             finish()
             return
         }
+
+        viewModel.checkAndLoadData()
 
         // Set initial fragment
         if (savedInstanceState == null) {
@@ -50,6 +54,11 @@ class DashboardActivity : AppCompatActivity() {
             binding.drawerLayout.closeDrawer(GravityCompat.START)
             true
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.checkAndLoadData()
     }
 
     private fun signOut() {

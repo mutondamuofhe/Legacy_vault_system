@@ -26,18 +26,6 @@ class DashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Fetch Live Financial Rates via REST API
-        CurrencyApiService.fetchLatestRates { rates ->
-            _binding?.let { b ->
-                b.tvRateZar.text = String.format("R %.2f", rates.zar)
-                b.tvRateEur.text = String.format("€ %.2f", rates.eur)
-                b.tvRateGbp.text = String.format("£ %.2f", rates.gbp)
-                b.tvApiStatus.text = if (rates.isSuccess) "● API Live" else "● Offline Cached"
-                b.tvApiStatus.setTextColor(if (rates.isSuccess) 0xFF4CAF50.toInt() else 0xFFFF9800.toInt())
-                b.tvApiTimestamp.text = "API Source: Open Exchange Rates API (${rates.lastUpdated})"
-            }
-        }
-
         viewModel.assets.observe(viewLifecycleOwner) { assets ->
             binding.tvAssetCount.text = assets.size.toString()
             updateVaultHealth()

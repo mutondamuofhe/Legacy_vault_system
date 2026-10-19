@@ -67,10 +67,51 @@ class LoginActivity : AppCompatActivity() {
             }
 
             if (email == "admin@legacy.com" && password == "admin123") {
-                Toast.makeText(this, "Admin Login Successful", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this, AdminActivity::class.java)
-                startActivity(intent)
-                finish()
+                auth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val userId = auth.currentUser?.uid
+                            if (userId != null) {
+                                val adminMap = hashMapOf(
+                                    "uid" to userId,
+                                    "email" to email,
+                                    "fullName" to "System Administrator",
+                                    "status" to "Active",
+                                    "role" to "admin",
+                                    "lastLogin" to Timestamp.now()
+                                )
+                                db.collection("users").document(userId).set(adminMap, SetOptions.merge())
+                            }
+                            Toast.makeText(this, "Admin Login Successful", Toast.LENGTH_SHORT).show()
+                            startActivity(Intent(this, AdminActivity::class.java))
+                            finish()
+                        } else {
+                            auth.createUserWithEmailAndPassword(email, password)
+                                .addOnCompleteListener { createTask ->
+                                    if (createTask.isSuccessful) {
+                                        val userId = auth.currentUser?.uid
+                                        if (userId != null) {
+                                            val adminMap = hashMapOf(
+                                                "uid" to userId,
+                                                "email" to email,
+                                                "fullName" to "System Administrator",
+                                                "status" to "Active",
+                                                "role" to "admin",
+                                                "createdAt" to Timestamp.now()
+                                            )
+                                            db.collection("users").document(userId).set(adminMap, SetOptions.merge())
+                                        }
+                                        Toast.makeText(this, "Admin Account Created & Logged In", Toast.LENGTH_SHORT).show()
+                                        startActivity(Intent(this, AdminActivity::class.java))
+                                        finish()
+                                    } else {
+                                        Toast.makeText(this, "Admin Login Successful", Toast.LENGTH_SHORT).show()
+                                        startActivity(Intent(this, AdminActivity::class.java))
+                                        finish()
+                                    }
+                                }
+                        }
+                    }
                 return@setOnClickListener
             }
 

@@ -38,6 +38,12 @@ class AdminDashboardFragment : Fragment() {
             _binding?.tvTotalVaults?.text = userCount.toString()
         }
 
+        // Listen to Documents across all user vaults
+        db.collectionGroup("documents").addSnapshotListener { snapshot, _ ->
+            val docCount = snapshot?.size() ?: 0
+            _binding?.tvTotalDocs?.text = docCount.toString()
+        }
+
         // Listen to Access Requests
         db.collection("access_requests").addSnapshotListener { snapshot, _ ->
             val pendingCount = snapshot?.documents?.count { it.getString("status") == "Pending" } ?: 0
