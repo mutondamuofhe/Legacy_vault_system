@@ -121,9 +121,31 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tv_verification_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="12dp"
+                    android:text="Email Verification Status: Verified"
+                    android:textColor="#2ECC71"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_resend_verification"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Resend Verification Link"
+                    android:textAllCaps="false"
+                    android:textColor="@color/primary_dark_blue"
+                    app:cornerRadius="8dp"
+                    app:strokeColor="@color/primary_dark_blue" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
                     android:text="@string/password_reset_description"
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp" />

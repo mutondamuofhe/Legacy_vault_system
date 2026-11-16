@@ -32,19 +32,22 @@ class VaultViewModel : ViewModel() {
     val activities: LiveData<List<Activity>> = _activities
 
     private var listeners = mutableListOf<ListenerRegistration>()
+    private var loadedUserId: String? = null
 
     init {
         loadData()
     }
 
     fun checkAndLoadData() {
-        if (listeners.isEmpty() && auth.currentUser != null) {
+        val currentUid = auth.currentUser?.uid
+        if (currentUid != null && (listeners.isEmpty() || loadedUserId != currentUid)) {
             loadData()
         }
     }
 
     fun loadData() {
         val userId = auth.currentUser?.uid ?: return
+        loadedUserId = userId
 
         // Clear old listeners if any
         listeners.forEach { it.remove() }
@@ -59,12 +62,13 @@ class VaultViewModel : ViewModel() {
                             name = doc.getString("name") ?: "",
                             platform = doc.getString("platform") ?: "",
                             category = doc.getString("category") ?: "",
+                            username = doc.getString("username") ?: "",
+                            passwordHint = doc.getString("passwordHint") ?: "",
+                            url = doc.getString("url") ?: "",
                             actionAfterDeath = doc.getString("actionAfterDeath") ?: "No Action"
                         )
                     }
-                    if (list.isNotEmpty() || _assets.value.isNullOrEmpty()) {
-                        _assets.value = list
-                    }
+                    _assets.value = list
                 }
             })
 
@@ -76,12 +80,12 @@ class VaultViewModel : ViewModel() {
                         Document(
                             title = doc.getString("title") ?: "",
                             category = doc.getString("category") ?: "",
-                            fileName = doc.getString("fileName") ?: ""
+                            fileName = doc.getString("fileName") ?: "",
+                            description = doc.getString("description") ?: "",
+                            notes = doc.getString("notes") ?: ""
                         )
                     }
-                    if (list.isNotEmpty() || _documents.value.isNullOrEmpty()) {
-                        _documents.value = list
-                    }
+                    _documents.value = list
                 }
             })
 
@@ -99,9 +103,7 @@ class VaultViewModel : ViewModel() {
                             isPrimary = doc.getBoolean("isPrimary") ?: false
                         )
                     }
-                    if (list.isNotEmpty() || _executors.value.isNullOrEmpty()) {
-                        _executors.value = list
-                    }
+                    _executors.value = list
                 }
             })
 
@@ -117,9 +119,7 @@ class VaultViewModel : ViewModel() {
                             priority = doc.getString("priority") ?: "Medium"
                         )
                     }
-                    if (list.isNotEmpty() || _instructions.value.isNullOrEmpty()) {
-                        _instructions.value = list
-                    }
+                    _instructions.value = list
                 }
             })
 
@@ -136,9 +136,7 @@ class VaultViewModel : ViewModel() {
                             iconType = doc.getString("iconType") ?: "asset"
                         )
                     }
-                    if (list.isNotEmpty() || _activities.value.isNullOrEmpty()) {
-                        _activities.value = list
-                    }
+                    _activities.value = list
                 }
             })
     }

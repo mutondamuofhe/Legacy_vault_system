@@ -50,6 +50,22 @@ class AdminVaultMonitoringFragment : Fragment() {
                 )
                 documentsList.add(document)
             }
+
+            // Ensure 5 sample vault monitoring items exist
+            val defaultVaultRecords = listOf(
+                Document("Moganedi's Directives & Instructions", "Instructions", "moganedi_directives.pdf", "High priority estate directives for Bridget Moganedi"),
+                Document("Muofhe Last Will & Testament", "Legal Document", "final_will_muofhe.pdf", "Signed legal last will and testament"),
+                Document("Nkanyane Property Title Deed", "Financial Record", "property_deed_nkanyane.pdf", "Primary residence title deed"),
+                Document("Moganedi Digital Banking Vault", "Digital Assets", "first_national_bank.acc", "Online banking & investment portfolio details"),
+                Document("More Living Trust Agreement", "Legal Document", "living_trust_more.pdf", "Family trust registration & executor authorization")
+            )
+
+            defaultVaultRecords.forEach { defDoc ->
+                if (documentsList.none { it.title == defDoc.title }) {
+                    documentsList.add(defDoc)
+                }
+            }
+
             adapter.notifyDataSetChanged()
         }
     }

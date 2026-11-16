@@ -34,6 +34,26 @@ class SettingsFragment : Fragment() {
         if (currentUser != null) {
             binding.etSettingsEmail.setText(currentUser.email ?: "")
             binding.etSettingsName.setText(currentUser.displayName ?: "")
+
+            currentUser.reload().addOnCompleteListener {
+                val user = auth.currentUser
+                val isVerified = user?.isEmailVerified == true || user?.providerData?.any { it.providerId == "google.com" } == true
+                _binding?.let { b ->
+                    b.tvVerificationStatus.text = if (isVerified) "Email Verification Status: Verified ✔" else "Email Verification Status: Unverified ⚠️"
+                    b.tvVerificationStatus.setTextColor(if (isVerified) 0xFF2ECC71.toInt() else 0xFFE74C3C.toInt())
+                    b.btnResendVerification.visibility = if (isVerified) View.GONE else View.VISIBLE
+                }
+            }
+        }
+
+        binding.btnResendVerification.setOnClickListener {
+            auth.currentUser?.sendEmailVerification()?.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Toast.makeText(requireContext(), "Verification link sent to ${auth.currentUser?.email}", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(requireContext(), "Failed to send link: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
         // Load SharedPreferences for switches

@@ -25,6 +25,7 @@ class VaultFragment : Fragment() {
 
     private val viewModel: VaultViewModel by activityViewModels()
     private var selectedFileName: String? = null
+    private var activeDialogBinding: DialogUploadDocumentBinding? = null
 
     private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -33,8 +34,10 @@ class VaultFragment : Fragment() {
                     val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
                     cursor.moveToFirst()
                     cursor.getString(nameIndex)
-                } ?: "file_uploaded"
+                } ?: "uploaded_file.pdf"
                 selectedFileName = fileName
+                activeDialogBinding?.tvUploadText?.text = "✔ Selected: $fileName"
+                activeDialogBinding?.tvUploadText?.setTextColor(0xFF2ECC71.toInt())
                 Toast.makeText(context, "Selected: $fileName", Toast.LENGTH_SHORT).show()
             }
         }
@@ -60,7 +63,7 @@ class VaultFragment : Fragment() {
                 documents.forEach { doc ->
                     val itemBinding = ItemDocumentBinding.inflate(layoutInflater, binding.layoutDocumentsList, false)
                     itemBinding.tvDocTitle.text = doc.title
-                    itemBinding.tvDocCategory.text = doc.category
+                    itemBinding.tvDocCategory.text = if (doc.fileName.isNotEmpty()) "${doc.category} • ${doc.fileName}" else doc.category
                     binding.layoutDocumentsList.addView(itemBinding.root)
                 }
             } else {
@@ -83,6 +86,7 @@ class VaultFragment : Fragment() {
         val dialog = Dialog(requireContext())
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         val dialogBinding = DialogUploadDocumentBinding.inflate(layoutInflater)
+        activeDialogBinding = dialogBinding
         dialog.setContentView(dialogBinding.root)
 
         dialog.window?.apply {
@@ -90,26 +94,43 @@ class VaultFragment : Fragment() {
             setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         }
 
-        dialogBinding.btnClose.setOnClickListener { dialog.dismiss() }
-        dialogBinding.btnCancel.setOnClickListener { dialog.dismiss() }
+        dialogBinding.btnClose.setOnClickListener {
+            activeDialogBinding = null
+            dialog.dismiss()
+        }
+        dialogBinding.btnCancel.setOnClickListener {
+            activeDialogBinding = null
+            dialog.dismiss()
+        }
         
         dialogBinding.layoutUpload.setOnClickListener {
-            val intent = Intent(Intent.ACTION_GET_CONTENT)
-            intent.type = "*/*"
+            val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                type = "*/*"
+                addCategory(Intent.CATEGORY_OPENABLE)
+            }
             filePickerLauncher.launch(intent)
         }
 
         dialogBinding.btnUploadConfirm.setOnClickListener {
-            val title = dialogBinding.etDocTitle.text.toString()
-            val category = dialogBinding.spinnerDocCategory.selectedItem?.toString() ?: ""
-            
+            val title = dialogBinding.etDocTitle.text.toString().trim()
+            val category = dialogBinding.spinnerDocCategory.selectedItem?.toString() ?: "General"
+            val description = dialogBinding.etDocDescription.text.toString().trim()
+            val notes = dialogBinding.etDocNotes.text.toString().trim()
+            val fileName = selectedFileName ?: if (title.isNotEmpty()) "${title.lowercase().replace(" ", "_")}.pdf" else "uploaded_doc.pdf"
+
             if (title.isNotEmpty()) {
-                viewModel.addDocument(title, category, selectedFileName ?: "unknown_file")
-                dialog.dismiss()
+                viewModel.addDocument(title, category, fileName, description, notes)
+                Toast.makeText(requireContext(), "Document '$title' uploaded successfully!", Toast.LENGTH_SHORT).show()
+                activeDialogBinding = null
                 selectedFileName = null
+                dialog.dismiss()
             } else {
                 dialogBinding.etDocTitle.error = "Title is required"
             }
+        }
+
+        dialog.setOnDismissListener {
+            activeDialogBinding = null
         }
 
         dialog.show()

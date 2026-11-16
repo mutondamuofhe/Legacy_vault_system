@@ -76,8 +76,26 @@ class AdminUserManagementFragment : Fragment() {
                     status = doc.getString("status") ?: "Active",
                     role = doc.getString("role") ?: "user"
                 )
-                allUsers.add(user)
+                if (user.email.isNotEmpty()) {
+                    allUsers.add(user)
+                }
             }
+
+            // Ensure requested default users exist
+            val defaultUsers = listOf(
+                AdminUserModel("mutonda_user_04", "Mutonda Muofhe", "mutondamuofhe04@gmail.com", "Active", "user"),
+                AdminUserModel("bridget_user_01", "Bridget Moganedi", "bridget.m@example.com", "Active", "user"),
+                AdminUserModel("rifa_user_02", "Rifa Nkanyane", "rifa.n@example.com", "Active", "user"),
+                AdminUserModel("lesego_user_03", "Lesego More", "lesego.m@example.com", "Active", "user"),
+                AdminUserModel("khumo_user_05", "Khumo Dlamini", "khumo.d@example.com", "Active", "user")
+            )
+
+            defaultUsers.forEach { defaultUser ->
+                if (allUsers.none { it.email.lowercase() == defaultUser.email.lowercase() }) {
+                    allUsers.add(defaultUser)
+                }
+            }
+
             val currentQuery = binding.tilSearchUsers.editText?.text.toString()
             filterUsers(currentQuery)
         }
@@ -100,14 +118,15 @@ class AdminUserManagementFragment : Fragment() {
 
     private fun toggleUserStatus(user: AdminUserModel) {
         val newStatus = if (user.status == "Active") "Suspended" else "Active"
-        db.collection("users").document(user.uid)
-            .update("status", newStatus)
-            .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Updated ${user.fullName} to $newStatus", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Failed: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
+        val idx = allUsers.indexOfFirst { it.uid == user.uid }
+        if (idx != -1) {
+            allUsers[idx] = allUsers[idx].copy(status = newStatus)
+            filterUsers(binding.tilSearchUsers.editText?.text.toString())
+        }
+        if (!user.uid.contains("_user_")) {
+            db.collection("users").document(user.uid).update("status", newStatus)
+        }
+        Toast.makeText(requireContext(), "Updated ${user.fullName} to $newStatus", Toast.LENGTH_SHORT).show()
     }
 
     private fun showEditUserDialog(user: AdminUserModel) {
@@ -121,11 +140,15 @@ class AdminUserManagementFragment : Fragment() {
             .setPositiveButton("Save") { _, _ ->
                 val newName = input.text.toString().trim()
                 if (newName.isNotEmpty()) {
-                    db.collection("users").document(user.uid)
-                        .update("fullName", newName)
-                        .addOnSuccessListener {
-                            Toast.makeText(requireContext(), "User updated!", Toast.LENGTH_SHORT).show()
-                        }
+                    val idx = allUsers.indexOfFirst { it.uid == user.uid }
+                    if (idx != -1) {
+                        allUsers[idx] = allUsers[idx].copy(fullName = newName)
+                        filterUsers(binding.tilSearchUsers.editText?.text.toString())
+                    }
+                    if (!user.uid.contains("_user_")) {
+                        db.collection("users").document(user.uid).update("fullName", newName)
+                    }
+                    Toast.makeText(requireContext(), "User updated!", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Cancel", null)

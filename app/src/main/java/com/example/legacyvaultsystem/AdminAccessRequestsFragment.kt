@@ -39,8 +39,8 @@ class AdminAccessRequestsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         adapter = AccessRequestsAdapter(requestsList,
-            onApprove = { req -> updateRequestStatus(req.id, "Approved") },
-            onReject = { req -> updateRequestStatus(req.id, "Rejected") }
+            onApprove = { req -> updateRequestStatus(req.id, "Accepted") },
+            onReject = { req -> updateRequestStatus(req.id, "Declined") }
         )
 
         binding.rvAdminRequests.layoutManager = LinearLayoutManager(requireContext())
@@ -62,29 +62,45 @@ class AdminAccessRequestsFragment : Fragment() {
                     )
                     requestsList.add(req)
                 }
-            } else {
-                // Default sample request for initial demonstration if none exists yet
-                requestsList.add(
-                    AccessRequestModel("sample_1", "Estate Access: Johnson Estate", "Requested by Sarah Johnson (Primary Executor)", "Pending")
-                )
             }
+
+            // Ensure 3 requests exist
+            val defaultRequests = listOf(
+                AccessRequestModel("req_1", "Estate Access: Johnson Estate", "Requested by Sarah Johnson (Primary Executor)", "Pending"),
+                AccessRequestModel("req_2", "Document Access: Nkanyane Trust", "Requested by Rifa Nkanyane (Legal Executor)", "Pending"),
+                AccessRequestModel("req_3", "Asset Transfer: Moganedi Vault", "Requested by Bridget Moganedi (Secondary Executor)", "Pending")
+            )
+
+            defaultRequests.forEach { defReq ->
+                if (requestsList.none { it.id == defReq.id }) {
+                    requestsList.add(defReq)
+                }
+            }
+
             adapter.notifyDataSetChanged()
         }
     }
 
-    private fun updateRequestStatus(reqId: String, status: String) {
-        if (reqId == "sample_1") {
+    private fun updateRequestStatus(reqId: String, newStatus: String) {
+        val idx = requestsList.indexOfFirst { it.id == reqId }
+        if (idx != -1) {
+            requestsList[idx] = requestsList[idx].copy(status = newStatus)
+            adapter.notifyDataSetChanged()
+        }
+
+        if (!reqId.startsWith("req_")) {
+            db.collection("access_requests").document(reqId).update("status", newStatus)
+        } else {
             val data = hashMapOf(
-                "title" to "Estate Access: Johnson Estate",
-                "details" to "Requested by Sarah Johnson (Primary Executor)",
-                "status" to status,
+                "title" to (requestsList.getOrNull(idx)?.title ?: "Estate Request"),
+                "details" to (requestsList.getOrNull(idx)?.details ?: "Requested by Executor"),
+                "status" to newStatus,
                 "timestamp" to com.google.firebase.Timestamp.now()
             )
-            db.collection("access_requests").document().set(data)
-        } else {
-            db.collection("access_requests").document(reqId).update("status", status)
+            db.collection("access_requests").document(reqId).set(data)
         }
-        Toast.makeText(requireContext(), "Request set to $status", Toast.LENGTH_SHORT).show()
+
+        Toast.makeText(requireContext(), "Request $newStatus", Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {
@@ -112,9 +128,18 @@ class AdminAccessRequestsFragment : Fragment() {
             holder.binding.tvRequestStatus.text = req.status
 
             when (req.status) {
-                "Approved" -> holder.binding.tvRequestStatus.setTextColor(0xFF2ECC71.toInt())
-                "Rejected" -> holder.binding.tvRequestStatus.setTextColor(0xFFE74C3C.toInt())
-                else -> holder.binding.tvRequestStatus.setTextColor(0xFFFF9800.toInt())
+                "Accepted", "Approved" -> {
+                    holder.binding.tvRequestStatus.text = "Accepted"
+                    holder.binding.tvRequestStatus.setTextColor(0xFF2ECC71.toInt())
+                }
+                "Declined", "Rejected" -> {
+                    holder.binding.tvRequestStatus.text = "Declined"
+                    holder.binding.tvRequestStatus.setTextColor(0xFFE74C3C.toInt())
+                }
+                else -> {
+                    holder.binding.tvRequestStatus.text = "Pending"
+                    holder.binding.tvRequestStatus.setTextColor(0xFFFF9800.toInt())
+                }
             }
 
             holder.binding.btnApproveRequest.setOnClickListener { onApprove(req) }

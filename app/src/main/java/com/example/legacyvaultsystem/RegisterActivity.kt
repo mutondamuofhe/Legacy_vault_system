@@ -83,6 +83,14 @@ class RegisterActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            if (!isValidStrictEmail(email)) {
+                binding.tilRegEmail.error = "Please enter a valid email address (e.g. name@example.com)"
+                Toast.makeText(this, "Invalid email format. Please enter a valid email.", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            } else {
+                binding.tilRegEmail.error = null
+            }
+
             if (password.length < 6) {
                 Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -106,7 +114,8 @@ class RegisterActivity : AppCompatActivity() {
                             db.collection("users").document(userId).set(userMap, SetOptions.merge())
                         }
 
-                        Toast.makeText(this, "Registration successful! Please login.", Toast.LENGTH_SHORT).show()
+                        auth.currentUser?.sendEmailVerification()
+                        Toast.makeText(this, "Registration successful! Verification link sent to $email", Toast.LENGTH_LONG).show()
                         val intent = Intent(this, LoginActivity::class.java)
                         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         startActivity(intent)
@@ -123,5 +132,18 @@ class RegisterActivity : AppCompatActivity() {
                 googleSignInLauncher.launch(signInIntent)
             }
         }
+    }
+
+    private fun isValidStrictEmail(email: String): Boolean {
+        if (email.isBlank()) return false
+        val pattern = Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+        if (!pattern.matches(email)) return false
+
+        val domainPart = email.substringAfter("@", "")
+        val domainName = domainPart.substringBeforeLast(".", "")
+        if (domainName.isEmpty() || domainName.matches(Regex("^[0-9]+$"))) {
+            return false
+        }
+        return true
     }
 }

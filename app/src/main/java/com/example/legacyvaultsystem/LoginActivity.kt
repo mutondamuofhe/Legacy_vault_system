@@ -12,6 +12,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
@@ -64,6 +66,14 @@ class LoginActivity : AppCompatActivity() {
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
+            }
+
+            if (!isValidStrictEmail(email)) {
+                binding.tilEmail.error = "Please enter a valid email address (e.g. name@example.com)"
+                Toast.makeText(this, "Invalid email format. Please enter a valid email.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            } else {
+                binding.tilEmail.error = null
             }
 
             if (email == "admin@legacy.com" && password == "admin123") {
@@ -122,12 +132,30 @@ class LoginActivity : AppCompatActivity() {
                         syncUserProfileAndNavigate(email)
                     } else {
                         val exception = task.exception
-                        if (exception is com.google.firebase.auth.FirebaseAuthInvalidUserException) {
-                            Toast.makeText(this, "User not found. Please register first.", Toast.LENGTH_LONG).show()
-                        } else if (exception is com.google.firebase.auth.FirebaseAuthInvalidCredentialsException) {
+                        if (exception is FirebaseAuthInvalidUserException) {
+                            // Seamless auto-creation if user account doesn't exist in Firebase Auth yet
+                            auth.createUserWithEmailAndPassword(email, password)
+                                .addOnCompleteListener(this) { regTask ->
+                                    if (regTask.isSuccessful) {
+                                        Toast.makeText(this, "Account Created & Logged In Successful", Toast.LENGTH_SHORT).show()
+                                        syncUserProfileAndNavigate(email)
+                                    } else {
+                                        Toast.makeText(this, "Login failed: ${regTask.exception?.message}", Toast.LENGTH_LONG).show()
+                                    }
+                                }
+                        } else if (exception is FirebaseAuthInvalidCredentialsException) {
                             Toast.makeText(this, "Invalid password. Please try again.", Toast.LENGTH_LONG).show()
                         } else {
-                            Toast.makeText(this, "Login failed: ${exception?.message}", Toast.LENGTH_LONG).show()
+                            // Fallback auto-creation for unexpected auth errors
+                            auth.createUserWithEmailAndPassword(email, password)
+                                .addOnCompleteListener(this) { fallbackTask ->
+                                    if (fallbackTask.isSuccessful) {
+                                        Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
+                                        syncUserProfileAndNavigate(email)
+                                    } else {
+                                        Toast.makeText(this, "Login failed: ${exception?.message}", Toast.LENGTH_LONG).show()
+                                    }
+                                }
                         }
                     }
                 }
@@ -139,6 +167,19 @@ class LoginActivity : AppCompatActivity() {
                 googleSignInLauncher.launch(signInIntent)
             }
         }
+    }
+
+    private fun isValidStrictEmail(email: String): Boolean {
+        if (email.isBlank()) return false
+        val pattern = Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+        if (!pattern.matches(email)) return false
+
+        val domainPart = email.substringAfter("@", "")
+        val domainName = domainPart.substringBeforeLast(".", "")
+        if (domainName.isEmpty() || domainName.matches(Regex("^[0-9]+$"))) {
+            return false
+        }
+        return true
     }
 
     private fun syncUserProfileAndNavigate(email: String, displayName: String = "") {
